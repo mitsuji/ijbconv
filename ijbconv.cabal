@@ -1,0 +1,44 @@
+name:                ijbconv
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/mitsuji/ijbconv#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Takamasa Mitsuji
+maintainer:          tkms@mitsuji.org
+copyright:           2017 Takamasa Mitsuji
+category:            Language
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Language.IchigoJamBASIC.CodeConverter
+  build-depends:       base >= 4.7 && < 5
+                     , bytestring
+                     , text
+                     , binary
+  default-language:    Haskell2010
+
+executable ijbconv-exe
+  hs-source-dirs:      app
+  main-is:             Main.hs
+--  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , ijbconv
+  default-language:    Haskell2010
+
+--test-suite ijbconv-test
+--  type:                exitcode-stdio-1.0
+--  hs-source-dirs:      test
+--  main-is:             Spec.hs
+--  build-depends:       base
+--                     , ijbconv
+--  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+--  default-language:    Haskell2010
+--
+source-repository head
+  type:     git
+  location: https://github.com/mitsuji/ijbconv
