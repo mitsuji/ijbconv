@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ijbconv</title>
+    <style>
+      dd { margin-bottom: 20px; }
+    </style>
+  </head>
+  <body>
+    <h1>ijbconv</h1>
+    <p>
+      IchiboJam BASIC RPi の SDカード の files ディレクトリ内のSAVEデータを扱うツールです。<br/>
+      ターミナルやコマンドプロンプトなどのシェル用コマンドとして実装しています。<br/>
+      <a href="https://github.com/mitsuji/ijbconv">https://github.com/mitsuji/ijbconv</a>
+    </p>
+
+    <h2>使い方</h2>
+
+    <h3>1. SAVEデータのBASICコードをテキスト表示する</h3>
+    
+    <pre>
+      $ ijbconv-exe &lt; {バイナリファイル}
+      
+      # 例
+      $ ijbconv-exe &lt; 100.bin
+    </pre>
+
+
+    <h3>2. SAVEデータのBASICコードをテキスト形式で保存する</h3>
+
+    <pre>
+      $ ijbconv-exe &lt; {バイナリファイル} &gt; {テキストファイル}
+
+      # 例
+      $ ijbconv-exe &lt; 100.bin &gt; 100.txt
+    </pre>
+
+      
+    <h3>3. テキスト形式のBASICコードをSAVEデータとして保存する</h3>
+
+    <pre>
+      $ ijbconv-exe tb &lt; {テキストファイル} &gt; {バイナリファイル}
+
+      # 例
+      $ ijbconv-exe tb &lt; 100.txt &gt; 100.bin
+    </pre>
+
+
+    <h2>ダウンロード</h2>
+    
+    <dl>
+      <dt>Linux版</dt>
+      <dd>
+	<a href="downloads/ijbconv-linux-amd64.zip">ijbconv-linux-amd64.zip</a>
+      </dd>
+      
+      <dt>MacOS版</dt>
+      <dd>
+	<a href="downloads/ijbconv-macos-amd64.zip">ijbconv-macos-amd64.zip</a>
+      </dd>
+      
+      <dt>Windows版</dt>
+      <dd>
+	<a href="downloads/ijbconv-windows-amd64.zip">ijbconv-windows-amd64.zip</a>
+      </dd>
+      
+    </dl>
+  
+  </body>
+</html>
+  
