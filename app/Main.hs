@@ -22,5 +22,11 @@ main = do
   case args of
     "bt":_ -> binaryToText
     "tb":_ -> textToBinary
-    _ -> binaryToText
-  
+    _ -> do
+      putStrLn "ijbconv 0.2.0.0"
+      putStrLn ""
+      putStrLn "Usage: ijbconv-exe [command] < [from file] > [to file]"
+      putStrLn ""
+      putStrLn "Available command:"
+      putStrLn "\tbt\tconvert binary to text"
+      putStrLn "\ttb\tconvert text to binary"

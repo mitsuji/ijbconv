@@ -125,8 +125,9 @@ writeBinaryCodeLine cout (CodeLine num code) = do
     bcode = encodeUtf8 code -- [TODO] convert emojis
     [low,high] = LBS.unpack $ runPut (putInt16le num)
     len = fromIntegral $ BS.length bcode
+    pad = if even len then 0 else 1 -- 奇数のときNULLで埋める
   BS.hPut cout $ BS.pack [low,high]
-  BS.hPut cout $ BS.pack [len]
+  BS.hPut cout $ BS.pack [len + (fromIntegral pad)]
   BS.hPut cout bcode
-  BS.hPut cout $ BS.pack [0]
-  return $ 2 + 1 + (fromIntegral len) + 1
+  BS.hPut cout $ BS.pack $ replicate (1+pad) 0
+  return $ 2 + 1 + (fromIntegral len) + (1+pad)
