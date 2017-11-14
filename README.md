@@ -1,5 +1,8 @@
 # ijbconv
 
+This tool handles SAVE data in the files directory of "IchigoJam BASIC RPi" SD card.
+[Document](https://mitsuji.github.io/ijbconv/index-ja.htm)
+
 
 ## build
 
