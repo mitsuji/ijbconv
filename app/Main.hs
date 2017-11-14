@@ -23,7 +23,7 @@ main = do
     "bt":_ -> binaryToText
     "tb":_ -> textToBinary
     _ -> do
-      putStrLn "ijbconv 0.2.0.0"
+      putStrLn "ijbconv 0.3.0.0"
       putStrLn ""
       putStrLn "Usage: ijbconv-exe [command] < [from file] > [to file]"
       putStrLn ""
