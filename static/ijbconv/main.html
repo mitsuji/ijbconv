@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>ijbconv web</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="main.js"></script>
+  </head>  
+  <body>
+    <h2>ijbconv web</h2>
+    <form id="btForm" style="width:600px;">
+      <div>
+	<input id="file1" type="file" name="binary">
+      </div>
+      <div style="text-align:right;">
+	<input id="button1" type="button" value="binary to text">
+      </div>
+    </form>
+    <form method="post" action="tb" style="width:600px;">
+      <div style="text-align:center;">
+	<textarea id="text1" name="text" style="width:96%;height:300px;"></textarea>
+      </div>
+      <div style="text-align:right;">
+	<input type="submit" value="text to binary">
+      </div>
+    </form>
+
+    <h3>To use like api with curl</h3>
+    <pre>
+curl -X POST http://example.com/ijbconv/bt -F "binary=@{filepath}"
+curl -X POST http://example.com/ijbconv/tb --data-urlencode "text@{filepath}"
+
+curl -X POST http://example.com/ijbconv/bt -F "binary=@data/test1.bin"
+curl -X POST http://example.com/ijbconv/tb --data-urlencode "text@data/test1.txt"
+    </pre>
+  </body>  
+</html>
+  

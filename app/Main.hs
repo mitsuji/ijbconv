@@ -1,20 +1,33 @@
 module Main where
 
-import Language.IchigoJamBASIC.CodeConverter (CodeLine(..),readBinary,writeText,readText,writeBinary)
+import Data.Monoid ((<>))
+
+import qualified Data.ByteString.Lazy as LBS
+import qualified Data.Text.Lazy.IO as LT
 import System.IO (stdin,stdout)
-import Data.List (sortOn)
+
+import Data.List (sort)
 import System.Environment (getArgs)
 
--- 念のため アドレス順に並べ替え
-sortList :: [CodeLine] -> [CodeLine]
-sortList = sortOn $ \(CodeLine num _) -> num
+import Language.IchigoJamBASIC.CodeConverter (fromText,toText,fromBinary,toBinary)
+
+
 
 binaryToText :: IO ()
-binaryToText = readBinary stdin >>= return . sortList >>= writeText stdout
+binaryToText = do
+  e <- fromBinary <$> LBS.hGetContents stdin
+  case e of
+    Left msg -> putStrLn $ "err: " <> msg
+    Right cl -> LT.hPutStr stdout $ toText $ sort cl
+
   
 textToBinary :: IO ()
-textToBinary = readText stdin >>= return . sortList >>= writeBinary stdout
-
+textToBinary = do
+  e <- fromText <$> LT.hGetContents stdin
+  case e of
+    Left msg -> putStrLn $ "err: " <> msg
+    Right cl -> LBS.hPutStr stdout $ toBinary $ sort cl
+  
 
 main :: IO ()
 main = do
