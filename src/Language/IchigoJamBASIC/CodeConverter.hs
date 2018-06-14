@@ -215,6 +215,43 @@ kanaFullWidthMulti= [
   ]
 
 
+emoji :: [(Word8,Int)]
+emoji = [
+   (0xe0,0x2b05)  -- 左矢印 ⬅
+  ,(0xe1,0x27a1)  -- 右矢印 ➡
+  ,(0xe2,0x2b06)  -- 上矢印 ⬆
+  ,(0xe3,0x2b07)  -- 下矢印 ⬇
+  ,(0xe4,0x2660)  -- スペード ♠
+  ,(0xe5,0x2665)  -- ハート ♥
+  ,(0xe6,0x2663)  -- クラブ ♣
+  ,(0xe7,0x2666)  -- ダイヤ ♦
+  ,(0xe8,0x25cb)  -- 白丸
+  ,(0xe9,0x25cf)  -- 黒丸
+  ,(0xea,0x2491)  -- 10.
+  ,(0xeb,0x1f359) -- おにぎり
+  ,(0xec,0x1f431) -- 猫(顔)
+  ,(0xed,0x1f47e) -- 宇宙人
+  ,(0xee,0x266a)  -- 音符 ♪
+  ,(0xef,0x1f365) -- なると
+   
+  ,(0xf0,0x1f680) -- ロケット
+--  ,(0xf1,0x1f6f8)  -- UFO -- 0x1f6f8
+  ,(0xf2,0x26a1)  -- 稲妻 ⚡
+  ,(0xf3,0x1f681) -- ヘリ
+--  ,(0xf4,0x0)     -- 破壊
+--  ,(0xf5,0x0)     -- 缶 
+  ,(0xf6,0x2709)  -- 封筒 ✉
+--  ,(0xf7,0x0)     -- 階段
+  ,(0xf8,0x1f6aa) -- ドア
+--  ,(0xf9,0x0)     -- 人(停止)
+--  ,(0xfa,0x0)     -- 人(着地)
+--  ,(0xfb,0x0)     -- 人(左走行)
+--  ,(0xfc,0x0)     -- 左枠
+--  ,(0xfd,0x0)     -- 人(右走行)
+--  ,(0xfe,0x0)     -- 右枠
+  ,(0xff,0x1f353) -- いちご
+  ]
+
 -- [TODO] カナの全角半角選択 -> 一旦全角固定
 -- [TODO] 絵文字対応         -> 一旦豆腐
 -- [TODO] 特殊絵文字対応     -> 一旦豆腐
@@ -226,6 +263,7 @@ decode bc = BS.foldl f "" bc
       let
         x = fromJust $ decodeVisible7bit b <|> decodeKanaFullWidth b
                                            <|> decodeGraph b
+                                           <|> decodeEmoji b
                                            <|> decodeOther b
       in xs <> x
 
@@ -255,6 +293,12 @@ decode bc = BS.foldl f "" bc
         g :: Maybe Int
         g = lookup b graph
 
+    decodeEmoji :: Word8 -> Maybe LTB.Builder
+    decodeEmoji b = LTB.singleton . toEnum <$> g
+      where
+        g :: Maybe Int
+        g = lookup b emoji
+
     decodeOther :: Word8 -> Maybe LTB.Builder
     decodeOther b = Just $ LTB.singleton '█' -- 豆腐
 
@@ -282,6 +326,7 @@ encode tx = T.foldl f "" tx
         x = fromJust $ encodeVisible7bit b <|> encodeKanaFullWidth b <|> encodeKanaFullWidthMulti b
                                            <|> encodeKanaHalfWidth b
                                            <|> encodeGraph b
+                                           <|> encodeEmoji b
                                            <|> encodeOther b
       in xs <> x
     
@@ -316,6 +361,12 @@ encode tx = T.foldl f "" tx
       where
         g :: Int -> Maybe Word8
         g c = lookup c (swap <$> graph)
+
+    encodeEmoji :: Char -> Maybe LBSB.Builder
+    encodeEmoji b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> emoji)
 
     encodeOther :: Char -> Maybe LBSB.Builder
     encodeOther _ = Just $ LBSB.word8 0x8F -- 豆腐
