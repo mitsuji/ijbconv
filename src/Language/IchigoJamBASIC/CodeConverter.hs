@@ -72,8 +72,9 @@ http://www.asahi-net.or.jp/~ax2s-kmtn/ref/unicode/u2580.html
 -- [#A0 - #DF] カナ
 -- [#E0 - #FF] 絵文字
 
-graph :: [(Word8,Int)]
-graph = [
+-- 2020/04 までの独自定義
+graphLegacy :: [(Word8,Int)]
+graphLegacy = [
    (0x80, 0x2003) -- ' '
   ,(0x81, 0x2598) -- '▘'
   ,(0x82, 0x259D) -- '▝'
@@ -90,8 +91,46 @@ graph = [
   ,(0x8D, 0x2599) -- '▙'
   ,(0x8E, 0x259F) -- '▟'
   ,(0x8F, 0x2588) -- '█'
-   
+
   ,(0x90, 0x30FB) -- '・' -- カナの中黒とおなじ。ほんとは変えたい。
+  ,(0x91, 0x2501) -- '━'
+  ,(0x92, 0x2503) -- '┃'
+  ,(0x93, 0x254B) -- '╋'
+  ,(0x94, 0x252B) -- '┫'
+  ,(0x95, 0x2523) -- '┣'
+  ,(0x96, 0x253B) -- '┻'
+  ,(0x97, 0x2533) -- '┳'
+  ,(0x98, 0x250F) -- '┏'
+  ,(0x99, 0x2513) -- '┓'
+  ,(0x9A, 0x2517) -- '┗'
+  ,(0x9B, 0x251B) -- '┛'
+  ,(0x9C, 0x25E4) -- '◤'
+  ,(0x9D, 0x25E5) -- '◥'
+  ,(0x9E, 0x25E3) -- '◣'
+  ,(0x9F, 0x25E2) -- '◤'
+  ]
+
+-- 2020/05 taisukef定義
+graph :: [(Word8,Int)]
+graph = [
+   (0x80, 0x3000) -- '　'
+  ,(0x81, 0x2598) -- '▘'
+  ,(0x82, 0x259D) -- '▝'
+  ,(0x83, 0x2580) -- '▀'  UPPER HALF
+  ,(0x84, 0x2596) -- '▖'
+  ,(0x85, 0x258C) -- '▌'  LEFT HALF
+  ,(0x86, 0x259E) -- '▞'
+  ,(0x87, 0x259B) -- '▛'
+  ,(0x88, 0x2597) -- '▗'
+  ,(0x89, 0x259A) -- '▚'
+  ,(0x8A, 0x2590) -- '▐'  RIGHT HALF
+  ,(0x8B, 0x259C) -- '▜'
+  ,(0x8C, 0x2584) -- '▄'  LOWER HALF
+  ,(0x8D, 0x2599) -- '▙'
+  ,(0x8E, 0x259F) -- '▟'
+  ,(0x8F, 0x2588) -- '█'
+   
+  ,(0x90, 0x30FB) -- '・' -- カナの中黒とおなじ。
   ,(0x91, 0x2501) -- '━'
   ,(0x92, 0x2503) -- '┃'
   ,(0x93, 0x254B) -- '╋'
@@ -215,8 +254,8 @@ kanaFullWidthMulti= [
   ]
 
 
-emoji :: [(Word8,Int)]
-emoji = [
+emojiLegacy :: [(Word8,Int)]
+emojiLegacy = [
    (0xe0,0x2b05)  -- 左矢印 ⬅
   ,(0xe1,0x27a1)  -- 右矢印 ➡
   ,(0xe2,0x2b06)  -- 上矢印 ⬆
@@ -255,7 +294,43 @@ emoji = [
   ,(0xff,0x1f353) -- いちご
   ]
 
--- [TODO] カナの全角半角選択 -> 一旦全角固定
+emoji :: [(Word8,Int)]
+emoji = [
+   (0xe0,0x2190)  -- 左矢印 ←
+  ,(0xe1,0x2192)  -- 右矢印 →
+  ,(0xe2,0x2191)  -- 上矢印 ↑
+  ,(0xe3,0x2193)  -- 下矢印 ↓
+  ,(0xe4,0x2660)  -- スペード ♠
+  ,(0xe5,0x2665)  -- ハート ♥
+  ,(0xe6,0x2663)  -- クラブ ♣
+  ,(0xe7,0x2666)  -- ダイヤ ♦
+  ,(0xe8,0x26AA)  -- 白丸 ⚪  -- 一旦公式とは逆にしておく
+  ,(0xe9,0x26AB)  -- 黒丸 ⚫  -- 一旦公式とは逆にしておく
+  ,(0xea,0x1f51f) -- 10.
+  ,(0xeb,0x1f359) -- おにぎり
+  ,(0xec,0x1f431) -- 猫(顔)
+  ,(0xed,0x1f47e) -- 宇宙人
+  ,(0xee,0x266a)  -- 音符 ♪
+  ,(0xef,0x1f300) -- Cyclone
+  ,(0xf0,0x1f680) -- ロケット
+  ,(0xf1,0x1f6f8) -- UFO flying Saucer
+  ,(0xf2,0x2307)  -- WAVY LINE
+  ,(0xf3,0x1f681) -- ヘリ
+  ,(0xf4,0x1f4a5) -- 衝突 COLLISTION SYMBOL 
+  ,(0xf5,0x1f4b0) -- Money bag
+  ,(0xf6,0x1f9f0) -- Toolbox
+  ,(0xf7,0x1f4f6) -- Antenna With Bars
+  ,(0xf8,0x1f6aa) -- ドア
+  ,(0xf9,0x1f574) -- Man In Business Suit Levitating
+  ,(0xfa,0x1f57a) -- Man Dancing
+  ,(0xfb,0x1f483) -- Dancer
+  ,(0xfc,0x1f3cc) -- Golfer
+  ,(0xfd,0x1f3c3) -- Runner
+  ,(0xfe,0x1f6b6) -- Pedestrain
+  ,(0xff,0x1f353) -- Strawberry
+  ]
+
+-- [TODO] カナの全角半角選択 -> 一旦全角固定 -> 半角に変更(公式追従 2020/05)
 -- [TODO] 絵文字対応         -> 一旦豆腐
 -- [TODO] 特殊絵文字対応     -> 一旦豆腐
 decode :: BS.ByteString -> LTB.Builder
@@ -264,7 +339,7 @@ decode bc = BS.foldl f "" bc
     f :: LTB.Builder -> Word8 -> LTB.Builder
     f xs b = 
       let
-        x = fromJust $ decodeVisible7bit b <|> decodeKanaFullWidth b
+        x = fromJust $ decodeVisible7bit b <|> decodeKanaHalfWidth b
                                            <|> decodeGraph b
                                            <|> decodeEmoji b
                                            <|> decodeOther b
@@ -317,7 +392,7 @@ decode bc = BS.foldl f "" bc
 
 -- [TODO] Either にしてエラー処理
 -- [TODO] 変換できない文字 -> エラー? 豆腐? -> 一旦豆腐
--- [TODO] 全角かな対応     -> 1文字濁音は2文字に
+-- [TODO] 全角かな対応     -> 1文字濁音は2文字に -> (ひらがなも対応 2020/05)
 -- [TODO] 絵文字対応       -> 一旦なし
 -- [TODO] 特殊絵文字対応   -> 一旦そのまま
 encode :: T.Text -> LBSB.Builder
@@ -330,6 +405,8 @@ encode tx = T.foldl f "" tx
                                            <|> encodeKanaHalfWidth b
                                            <|> encodeGraph b
                                            <|> encodeEmoji b
+                                           <|> encodeGraphLegacy b
+                                           <|> encodeEmojiLegacy b
                                            <|> encodeOther b
       in xs <> x
     
@@ -359,11 +436,23 @@ encode tx = T.foldl f "" tx
           | 0xFF61 <= c && c <= 0xFF9F = Just $ fromIntegral $ c - (0xFF61-0xA1)
           | otherwise                  = Nothing
 
+    encodeGraphLegacy :: Char -> Maybe LBSB.Builder
+    encodeGraphLegacy b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> graphLegacy)
+
     encodeGraph :: Char -> Maybe LBSB.Builder
     encodeGraph b = LBSB.word8 <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe Word8
         g c = lookup c (swap <$> graph)
+
+    encodeEmojiLegacy :: Char -> Maybe LBSB.Builder
+    encodeEmojiLegacy b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> emojiLegacy)
 
     encodeEmoji :: Char -> Maybe LBSB.Builder
     encodeEmoji b = LBSB.word8 <$> (g $ fromEnum b)
