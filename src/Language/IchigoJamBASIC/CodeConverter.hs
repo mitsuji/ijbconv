@@ -62,8 +62,8 @@ http://www.asahi-net.or.jp/~ax2s-kmtn/ref/unicode/u2580.html
 --}
 
 
--- decode カナ(全角カナに濁点・半濁点も1文字で変換)
--- encode カナ(カタカナひらがなを変換,濁点・半濁点つきの文字は2文字に変換)
+-- decode カナ(濁点・半濁点も1文字で変換)
+-- encode カナ(半角カナ,全角カナ,全角かなを変換,濁点・半濁点つきの文字は2文字に変換)
 
 
 -- [#00 - #0F] 特殊絵文字(ASCIIの非表示範囲)
@@ -358,6 +358,13 @@ hiraganaFullWidthMulti= [
   ]
 
 
+kanaAdditional :: [(Word8,Int)]
+kanaAdditional= [
+   (0xDE, 0x3099) -- '゙' 濁点(合成用)
+  ,(0xDF, 0x309A) -- '゚' 半濁点(合成用)
+  ]
+
+
 emojiLegacy :: [(Word8,Int)]
 emojiLegacy = [
    (0xe0,0x2b05)  -- 左矢印 ⬅
@@ -502,10 +509,9 @@ decode kanaDecode bc = BS.foldl f "" bc
 
 
 
--- [MEMO] 変換できない文字 -> '█'(0x8F)
 -- [TODO] 変換できない文字の扱い選択
 --        * 消す
---        * 特定の文字に置換
+--        * 特定の文字に置換 -> 一旦 -> '█'(0x8F)
 -- [TODO] 特殊絵文字対応?
 encode :: T.Text -> LBSB.Builder
 encode tx = T.foldl f "" tx
@@ -516,6 +522,7 @@ encode tx = T.foldl f "" tx
         x = fromJust $ encodeVisible7bit b <|> encodeKatakanaHalfWidth b
                                            <|> encodeKatakanaFullWidth b <|> encodeKatakanaFullWidthMulti b
                                            <|> encodeHiraganaFullWidth b <|> encodeHiraganaFullWidthMulti b
+                                           <|> encodeKanaAdditional b
                                            <|> encodeGraph b
                                            <|> encodeEmoji b
                                            <|> encodeGraphLegacy b
@@ -560,6 +567,12 @@ encode tx = T.foldl f "" tx
       where
         g :: Int -> Maybe [Word8]
         g c = lookup c (swap <$> hiraganaFullWidthMulti)
+
+    encodeKanaAdditional :: Char -> Maybe LBSB.Builder
+    encodeKanaAdditional b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> kanaAdditional)
 
     encodeGraphLegacy :: Char -> Maybe LBSB.Builder
     encodeGraphLegacy b = LBSB.word8 <$> (g $ fromEnum b)
