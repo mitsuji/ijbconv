@@ -3,6 +3,7 @@
 module Language.IchigoJamBASIC.CodeConverter
        ( CodeLine(..)
        , CodeList(..)
+       , KanaDecode(..)
        , fromText
        , toText
        , fromBinary
@@ -61,8 +62,8 @@ http://www.asahi-net.or.jp/~ax2s-kmtn/ref/unicode/u2580.html
 --}
 
 
--- decode カナ(全角カナに濁点・半濁点も1文字で変換)
--- encode カナ(カタカナひらがなを変換,濁点・半濁点つきの文字は2文字に変換)
+-- decode カナ(濁点・半濁点も1文字で変換)
+-- encode カナ(半角カナ,全角カナ,全角かなを変換,濁点・半濁点つきの文字は2文字に変換)
 
 
 -- [#00 - #0F] 特殊絵文字(ASCIIの非表示範囲)
@@ -72,8 +73,9 @@ http://www.asahi-net.or.jp/~ax2s-kmtn/ref/unicode/u2580.html
 -- [#A0 - #DF] カナ
 -- [#E0 - #FF] 絵文字
 
-graph :: [(Word8,Int)]
-graph = [
+-- 2020/04 までの独自定義
+graphLegacy :: [(Word8,Int)]
+graphLegacy = [
    (0x80, 0x2003) -- ' '
   ,(0x81, 0x2598) -- '▘'
   ,(0x82, 0x259D) -- '▝'
@@ -90,7 +92,7 @@ graph = [
   ,(0x8D, 0x2599) -- '▙'
   ,(0x8E, 0x259F) -- '▟'
   ,(0x8F, 0x2588) -- '█'
-   
+
   ,(0x90, 0x30FB) -- '・' -- カナの中黒とおなじ。ほんとは変えたい。
   ,(0x91, 0x2501) -- '━'
   ,(0x92, 0x2503) -- '┃'
@@ -109,9 +111,47 @@ graph = [
   ,(0x9F, 0x25E2) -- '◤'
   ]
 
+-- 2020/05 taisukef定義
+graph :: [(Word8,Int)]
+graph = [
+   (0x80, 0x3000) -- '　'
+  ,(0x81, 0x2598) -- '▘'
+  ,(0x82, 0x259D) -- '▝'
+  ,(0x83, 0x2580) -- '▀'  UPPER HALF
+  ,(0x84, 0x2596) -- '▖'
+  ,(0x85, 0x258C) -- '▌'  LEFT HALF
+  ,(0x86, 0x259E) -- '▞'
+  ,(0x87, 0x259B) -- '▛'
+  ,(0x88, 0x2597) -- '▗'
+  ,(0x89, 0x259A) -- '▚'
+  ,(0x8A, 0x2590) -- '▐'  RIGHT HALF
+  ,(0x8B, 0x259C) -- '▜'
+  ,(0x8C, 0x2584) -- '▄'  LOWER HALF
+  ,(0x8D, 0x2599) -- '▙'
+  ,(0x8E, 0x259F) -- '▟'
+  ,(0x8F, 0x2588) -- '█'
+   
+  ,(0x90, 0x30FB) -- '・' -- カナの中黒とおなじ。
+  ,(0x91, 0x2501) -- '━'
+  ,(0x92, 0x2503) -- '┃'
+  ,(0x93, 0x254B) -- '╋'
+  ,(0x94, 0x252B) -- '┫'
+  ,(0x95, 0x2523) -- '┣'
+  ,(0x96, 0x253B) -- '┻'
+  ,(0x97, 0x2533) -- '┳'
+  ,(0x98, 0x250F) -- '┏'
+  ,(0x99, 0x2513) -- '┓'
+  ,(0x9A, 0x2517) -- '┗'
+  ,(0x9B, 0x251B) -- '┛'
+  ,(0x9C, 0x25E4) -- '◤'
+  ,(0x9D, 0x25E5) -- '◥'
+  ,(0x9E, 0x25E3) -- '◣'
+  ,(0x9F, 0x25E2) -- '◤'
+  ]
 
-kanaFullWidth :: [(Word8,Int)]
-kanaFullWidth= [
+
+katakanaFullWidth :: [(Word8,Int)]
+katakanaFullWidth= [
    (0xA0, 0xFFE5) -- '￥'
   ,(0xA1, 0x3002) -- '。'
   ,(0xA2, 0x300C) -- '「'
@@ -181,9 +221,81 @@ kanaFullWidth= [
   ,(0xDF, 0x309C) -- '゜'
   ]
 
+hiraganaFullWidth :: [(Word8,Int)]
+hiraganaFullWidth= [
+   (0xA0, 0xFFE5) -- '￥'
+  ,(0xA1, 0x3002) -- '。'
+  ,(0xA2, 0x300C) -- '「'
+  ,(0xA3, 0x300D) -- '」'
+  ,(0xA4, 0x3001) -- '、'
+  ,(0xA5, 0x30FB) -- '・'
+  ,(0xA6, 0x3092) -- 'を'
+  ,(0xA7, 0x3041) -- 'ぁ'
+  ,(0xA8, 0x3043) -- 'ぃ'
+  ,(0xA9, 0x3045) -- 'ぅ'
+  ,(0xAA, 0x3047) -- 'ぇ'
+  ,(0xAB, 0x3049) -- 'ぉ'
+  ,(0xAC, 0x3083) -- 'ゃ'
+  ,(0xAD, 0x3085) -- 'ゅ'
+  ,(0xAE, 0x3087) -- 'ょ'
+  ,(0xAF, 0x3063) -- 'っ'
 
-kanaFullWidthMulti :: [([Word8],Int)]
-kanaFullWidthMulti= [
+  ,(0xB0, 0x30FC) -- 'ー'
+  ,(0xB1, 0x3042) -- 'あ'
+  ,(0xB2, 0x3044) -- 'い'
+  ,(0xB3, 0x3046) -- 'う'
+  ,(0xB4, 0x3048) -- 'え'
+  ,(0xB5, 0x304A) -- 'お'
+  ,(0xB6, 0x304B) -- 'か'
+  ,(0xB7, 0x304D) -- 'き'
+  ,(0xB8, 0x304F) -- 'く'
+  ,(0xB9, 0x3051) -- 'け'
+  ,(0xBA, 0x3053) -- 'こ'
+  ,(0xBB, 0x3055) -- 'さ'
+  ,(0xBC, 0x3057) -- 'し'
+  ,(0xBD, 0x3059) -- 'す'
+  ,(0xBE, 0x305B) -- 'せ'
+  ,(0xBF, 0x305D) -- 'そ'
+
+  ,(0xC0, 0x305F) -- 'た'
+  ,(0xC1, 0x3061) -- 'ち'
+  ,(0xC2, 0x3064) -- 'つ'
+  ,(0xC3, 0x3066) -- 'て'
+  ,(0xC4, 0x3068) -- 'と'
+  ,(0xC5, 0x306A) -- 'な'
+  ,(0xC6, 0x306B) -- 'に'
+  ,(0xC7, 0x306C) -- 'ぬ'
+  ,(0xC8, 0x306D) -- 'ね'
+  ,(0xC9, 0x306E) -- 'の'
+  ,(0xCA, 0x306F) -- 'は'
+  ,(0xCB, 0x3072) -- 'ひ'
+  ,(0xCC, 0x3075) -- 'ふ'
+  ,(0xCD, 0x3078) -- 'へ'
+  ,(0xCE, 0x307B) -- 'ほ'
+  ,(0xCF, 0x307E) -- 'ま'
+
+  ,(0xD0, 0x307F) -- 'み'
+  ,(0xD1, 0x3080) -- 'む'
+  ,(0xD2, 0x3081) -- 'め'
+  ,(0xD3, 0x3082) -- 'も'
+  ,(0xD4, 0x3084) -- 'や'
+  ,(0xD5, 0x3086) -- 'ゆ'
+  ,(0xD6, 0x3088) -- 'よ'
+  ,(0xD7, 0x3089) -- 'ら'
+  ,(0xD8, 0x308A) -- 'り'
+  ,(0xD9, 0x308B) -- 'る'
+  ,(0xDA, 0x308C) -- 'れ'
+  ,(0xDB, 0x308D) -- 'ろ'
+  ,(0xDC, 0x308F) -- 'わ'
+  ,(0xDD, 0x3093) -- 'ん'
+  ,(0xDE, 0x309B) -- '゛'
+  ,(0xDF, 0x309C) -- '゜'
+  ]
+
+
+
+katakanaFullWidthMulti :: [([Word8],Int)]
+katakanaFullWidthMulti= [
    ([0xB6,0xDE], 0x30AC) -- 'ガ'
   ,([0xB7,0xDE], 0x30AE) -- 'ギ'
   ,([0xB8,0xDE], 0x30B0) -- 'グ'
@@ -215,8 +327,46 @@ kanaFullWidthMulti= [
   ]
 
 
-emoji :: [(Word8,Int)]
-emoji = [
+hiraganaFullWidthMulti :: [([Word8],Int)]
+hiraganaFullWidthMulti= [
+   ([0xB6,0xDE], 0x304C) -- 'が'
+  ,([0xB7,0xDE], 0x304E) -- 'ぎ'
+  ,([0xB8,0xDE], 0x3050) -- 'ぐ'
+  ,([0xB9,0xDE], 0x3052) -- 'げ'
+  ,([0xBA,0xDE], 0x3054) -- 'ご'
+  ,([0xBB,0xDE], 0x3056) -- 'ざ'
+  ,([0xBC,0xDE], 0x3058) -- 'じ'
+  ,([0xBD,0xDE], 0x305A) -- 'ず'
+  ,([0xBE,0xDE], 0x305C) -- 'ぜ'
+  ,([0xBF,0xDE], 0x305E) -- 'ぞ'
+  ,([0xC0,0xDE], 0x3060) -- 'だ'
+  ,([0xC1,0xDE], 0x3062) -- 'ぢ'
+  ,([0xC2,0xDE], 0x3065) -- 'づ'
+  ,([0xC3,0xDE], 0x3067) -- 'で'
+  ,([0xC4,0xDE], 0x3069) -- 'ど'
+  ,([0xCA,0xDE], 0x3070) -- 'ば'
+  ,([0xCA,0xDF], 0x3071) -- 'ぱ'
+  ,([0xCB,0xDE], 0x3073) -- 'び'
+  ,([0xCB,0xDF], 0x3074) -- 'ぴ'
+  ,([0xCC,0xDE], 0x3076) -- 'ぶ'
+  ,([0xCC,0xDF], 0x3077) -- 'ぷ'
+  ,([0xCD,0xDE], 0x3079) -- 'べ'
+  ,([0xCD,0xDF], 0x307A) -- 'ぺ'
+  ,([0xCE,0xDE], 0x307C) -- 'ぼ'
+  ,([0xCE,0xDF], 0x307D) -- 'ぽ'
+  ,([0xB3,0xDE], 0x3094) -- 'ゔ'
+  ]
+
+
+kanaAdditional :: [(Word8,Int)]
+kanaAdditional= [
+   (0xDE, 0x3099) -- '゙' 濁点(合成用)
+  ,(0xDF, 0x309A) -- '゚' 半濁点(合成用)
+  ]
+
+
+emojiLegacy :: [(Word8,Int)]
+emojiLegacy = [
    (0xe0,0x2b05)  -- 左矢印 ⬅
   ,(0xe1,0x27a1)  -- 右矢印 ➡
   ,(0xe2,0x2b06)  -- 上矢印 ⬆
@@ -255,16 +405,61 @@ emoji = [
   ,(0xff,0x1f353) -- いちご
   ]
 
--- [TODO] カナの全角半角選択 -> 一旦全角固定
--- [TODO] 絵文字対応         -> 一旦豆腐
--- [TODO] 特殊絵文字対応     -> 一旦豆腐
-decode :: BS.ByteString -> LTB.Builder
-decode bc = BS.foldl f "" bc
+emoji :: [(Word8,Int)]
+emoji = [
+   (0xe0,0x2190)  -- 左矢印 ←
+  ,(0xe1,0x2192)  -- 右矢印 →
+  ,(0xe2,0x2191)  -- 上矢印 ↑
+  ,(0xe3,0x2193)  -- 下矢印 ↓
+  ,(0xe4,0x2660)  -- スペード ♠
+  ,(0xe5,0x2665)  -- ハート ♥
+  ,(0xe6,0x2663)  -- クラブ ♣
+  ,(0xe7,0x2666)  -- ダイヤ ♦
+  ,(0xe8,0x26AB)  -- 黒丸 ⚫ -- (IchiogJam は黒背景基準)
+  ,(0xe9,0x26AA)  -- 白丸 ⚪ -- (IchiogJam は黒背景基準)
+  ,(0xea,0x1f51f) -- 10.
+  ,(0xeb,0x1f359) -- おにぎり
+  ,(0xec,0x1f431) -- 猫(顔)
+  ,(0xed,0x1f47e) -- 宇宙人
+  ,(0xee,0x266a)  -- 音符 ♪
+  ,(0xef,0x1f300) -- Cyclone
+  ,(0xf0,0x1f680) -- ロケット
+  ,(0xf1,0x1f6f8) -- UFO flying Saucer
+  ,(0xf2,0x2307)  -- WAVY LINE
+  ,(0xf3,0x1f681) -- ヘリ
+  ,(0xf4,0x1f4a5) -- 衝突 COLLISTION SYMBOL 
+  ,(0xf5,0x1f4b0) -- Money bag
+  ,(0xf6,0x1f9f0) -- Toolbox
+  ,(0xf7,0x1f4f6) -- Antenna With Bars
+  ,(0xf8,0x1f6aa) -- ドア
+  ,(0xf9,0x1f574) -- Man In Business Suit Levitating
+  ,(0xfa,0x1f57a) -- Man Dancing
+  ,(0xfb,0x1f483) -- Dancer
+  ,(0xfc,0x1f3cc) -- Golfer
+  ,(0xfd,0x1f3c3) -- Runner
+  ,(0xfe,0x1f6b6) -- Pedestrain
+  ,(0xff,0x1f353) -- Strawberry
+  ]
+
+
+
+data KanaDecode = KDKatakanaHalfWidth
+                | KDKatakanaFullWidth
+                | KDHiraganaFullWidth
+
+-- [TODO] カナの出力方法選択
+--        * 半角カナ
+--        * 全角カナ
+--        * 全角かな
+-- [MEMO] 変換できない文字 -> '�'(0xFFFD)
+-- [TODO] 特殊絵文字対応?
+decode :: KanaDecode -> BS.ByteString -> LTB.Builder
+decode kanaDecode bc = BS.foldl f "" bc
   where
     f :: LTB.Builder -> Word8 -> LTB.Builder
     f xs b = 
       let
-        x = fromJust $ decodeVisible7bit b <|> decodeKanaFullWidth b
+        x = fromJust $ decodeVisible7bit b <|> decodeKatakana b
                                            <|> decodeGraph b
                                            <|> decodeEmoji b
                                            <|> decodeOther b
@@ -274,21 +469,19 @@ decode bc = BS.foldl f "" bc
     decodeVisible7bit b
       | 0x20 <=b && b <= 0x7E = Just $ LTB.singleton $ toEnum $ fromIntegral b
       | otherwise = Nothing
-    
-    decodeKanaFullWidth :: Word8 -> Maybe LTB.Builder
-    decodeKanaFullWidth b = LTB.singleton . toEnum <$> g
+
+    decodeKatakana :: Word8 -> Maybe LTB.Builder
+    decodeKatakana b = LTB.singleton . toEnum <$> case kanaDecode of
+                                                    KDKatakanaHalfWidth -> katakanaHalfWidth
+                                                    KDKatakanaFullWidth -> lookup b katakanaFullWidth
+                                                    KDHiraganaFullWidth -> lookup b hiraganaFullWidth
       where
-        g :: Maybe Int
-        g = lookup b kanaFullWidth
-        
-    decodeKanaHalfWidth :: Word8 -> Maybe LTB.Builder
-    decodeKanaHalfWidth b = LTB.singleton . toEnum <$> g
-      where
-        g :: Maybe Int
-        g
+        katakanaHalfWidth :: Maybe Int
+        katakanaHalfWidth
           | b == 0xA0              = Just 0xA5
           | 0xA1 <= b && b <= 0xDF = Just $ (fromIntegral b) + (0xFF61-0xA1)
           | otherwise              = Nothing
+
 
     decodeGraph :: Word8 -> Maybe LTB.Builder
     decodeGraph b = LTB.singleton . toEnum <$> g
@@ -303,7 +496,7 @@ decode bc = BS.foldl f "" bc
         g = lookup b emoji
 
     decodeOther :: Word8 -> Maybe LTB.Builder
-    decodeOther b = Just $ LTB.singleton '█' -- 豆腐
+    decodeOther b = Just $ LTB.singleton '�' -- 0xFFFD
 
 {--         
     decodeOther :: Word8 -> Maybe LTB.Builder
@@ -315,21 +508,25 @@ decode bc = BS.foldl f "" bc
 --}
 
 
--- [TODO] Either にしてエラー処理
--- [TODO] 変換できない文字 -> エラー? 豆腐? -> 一旦豆腐
--- [TODO] 全角かな対応     -> 1文字濁音は2文字に
--- [TODO] 絵文字対応       -> 一旦なし
--- [TODO] 特殊絵文字対応   -> 一旦そのまま
+
+-- [TODO] 変換できない文字の扱い選択
+--        * 消す
+--        * 特定の文字に置換 -> 一旦 -> '█'(0x8F)
+-- [TODO] 特殊絵文字対応?
 encode :: T.Text -> LBSB.Builder
 encode tx = T.foldl f "" tx
   where
     f :: LBSB.Builder -> Char -> LBSB.Builder
     f xs b = 
       let
-        x = fromJust $ encodeVisible7bit b <|> encodeKanaFullWidth b <|> encodeKanaFullWidthMulti b
-                                           <|> encodeKanaHalfWidth b
+        x = fromJust $ encodeVisible7bit b <|> encodeKatakanaHalfWidth b
+                                           <|> encodeKatakanaFullWidth b <|> encodeKatakanaFullWidthMulti b
+                                           <|> encodeHiraganaFullWidth b <|> encodeHiraganaFullWidthMulti b
+                                           <|> encodeKanaAdditional b
                                            <|> encodeGraph b
                                            <|> encodeEmoji b
+                                           <|> encodeGraphLegacy b
+                                           <|> encodeEmojiLegacy b
                                            <|> encodeOther b
       in xs <> x
     
@@ -338,20 +535,20 @@ encode tx = T.foldl f "" tx
       | isAscii b = Just $ LBSB.char7 b
       | otherwise = Nothing
                     
-    encodeKanaFullWidth :: Char -> Maybe LBSB.Builder
-    encodeKanaFullWidth b = LBSB.word8 <$> (g $ fromEnum b)
+    encodeKatakanaFullWidth :: Char -> Maybe LBSB.Builder
+    encodeKatakanaFullWidth b = LBSB.word8 <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe Word8
-        g c = lookup c (swap <$> kanaFullWidth)
+        g c = lookup c (swap <$> katakanaFullWidth)
         
-    encodeKanaFullWidthMulti :: Char -> Maybe LBSB.Builder
-    encodeKanaFullWidthMulti b = mconcat <$> (map LBSB.word8) <$> (g $ fromEnum b)
+    encodeKatakanaFullWidthMulti :: Char -> Maybe LBSB.Builder
+    encodeKatakanaFullWidthMulti b = mconcat <$> (map LBSB.word8) <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe [Word8]
-        g c = lookup c (swap <$> kanaFullWidthMulti)
+        g c = lookup c (swap <$> katakanaFullWidthMulti)
 
-    encodeKanaHalfWidth :: Char -> Maybe LBSB.Builder
-    encodeKanaHalfWidth b = LBSB.word8 <$> (g $ fromEnum b)
+    encodeKatakanaHalfWidth :: Char -> Maybe LBSB.Builder
+    encodeKatakanaHalfWidth b = LBSB.word8 <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe Word8
         g c
@@ -359,11 +556,41 @@ encode tx = T.foldl f "" tx
           | 0xFF61 <= c && c <= 0xFF9F = Just $ fromIntegral $ c - (0xFF61-0xA1)
           | otherwise                  = Nothing
 
+    encodeHiraganaFullWidth :: Char -> Maybe LBSB.Builder
+    encodeHiraganaFullWidth b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> hiraganaFullWidth)
+
+    encodeHiraganaFullWidthMulti :: Char -> Maybe LBSB.Builder
+    encodeHiraganaFullWidthMulti b = mconcat <$> (map LBSB.word8) <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe [Word8]
+        g c = lookup c (swap <$> hiraganaFullWidthMulti)
+
+    encodeKanaAdditional :: Char -> Maybe LBSB.Builder
+    encodeKanaAdditional b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> kanaAdditional)
+
+    encodeGraphLegacy :: Char -> Maybe LBSB.Builder
+    encodeGraphLegacy b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> graphLegacy)
+
     encodeGraph :: Char -> Maybe LBSB.Builder
     encodeGraph b = LBSB.word8 <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe Word8
         g c = lookup c (swap <$> graph)
+
+    encodeEmojiLegacy :: Char -> Maybe LBSB.Builder
+    encodeEmojiLegacy b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> emojiLegacy)
 
     encodeEmoji :: Char -> Maybe LBSB.Builder
     encodeEmoji b = LBSB.word8 <$> (g $ fromEnum b)
@@ -379,8 +606,8 @@ encode tx = T.foldl f "" tx
 
 
 -- [前] 各文字コードから事前に LT.Text に デコード しておく前提
--- attoparsec で 行番号, コード を parse
--- BASICコードをLT.TextからIchigoJamの文字コードに変換(encode)
+-- [MEMO] attoparsec で 行番号, コード を parse
+-- [MEMO] BASICコードをLT.TextからIchigoJamの文字コードに変換(encode)
 -- [TODO] check コード行は255文字まで
 -- [TODO] コードをトリム?
 -- [TODO] endOfInput?
@@ -401,21 +628,21 @@ fromText xs =
 
 
 -- [前] 各文字コードには事後に LT.Text から エンコード する前提
--- LTB.Builder を Writer で構築して LT.Text を生成
--- BASICコードをIchigoJamの文字コードからLTB.Builderに変換(decode)
-toText :: CodeList -> LT.Text
-toText = LTB.toLazyText . execWriter . (mapM_ writeLine)
+-- [MEMO] LTB.Builder を Writer で構築して LT.Text を生成
+-- [MEMO] BASICコードをIchigoJamの文字コードからLTB.Builderに変換(decode)
+toText :: KanaDecode -> CodeList -> LT.Text
+toText kd = LTB.toLazyText . execWriter . (mapM_ writeLine)
   where
     writeLine ::  CodeLine -> Writer LTB.Builder ()
     writeLine (CodeLine num line) = do
       tell $ LTB.fromString $ show num
       tell $ LTB.singleton ' '
-      tell $ decode line
+      tell $ decode kd line
       tell $ LTB.singleton '\n'
 
 
 
--- Binary.Get で 行番号, コードを parse
+-- [MEMO] Binary.Get で 行番号, コードを parse
 -- [TODO] check コード行は255文字まで
 -- [TODO] check num > 0
 fromBinary :: LBS.ByteString -> Either String CodeList
@@ -450,7 +677,7 @@ fromBinary bs =
       
 
 
--- Binary.Put で LBS.ByteString を生成
+-- [MEMO] Binary.Put で LBS.ByteString を生成
 toBinary :: CodeList -> LBS.ByteString
 toBinary xs = P.runPut $ do
   rcount <- sum <$> mapM putLine xs
