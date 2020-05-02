@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8">
   </head>  
@@ -7,6 +7,20 @@
     <form method="post" action="mbtz" enctype="multipart/form-data">
       <div>
 	<input type="file" name="binary" accept=".bin" multiple="multiple">
+      </div>
+      <div>
+	Kana Output:
+	  <input id="kd-kkh" type="radio" name="kana-decode" value="katakana-half" checked>
+	  <label for="kd-kkh">Katakana Half</label>
+
+	  <input id="kd-kkf" type="radio" name="kana-decode" value="katakana-full">
+	  <label for="kd-kkf">Katakana Full</label>
+
+	  <input id="kd-hgf" type="radio" name="kana-decode" value="hiragana-full">
+	  <label for="kd-hgf">Hiragana Full</label>
+
+      </div>
+      <div style="text-align:right;">
 	<input type="submit" value="binary to text zip">
       </div>
     </form>

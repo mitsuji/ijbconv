@@ -60,12 +60,12 @@ curl -X POST http://localhost:9999/ijbconv/bt -F "binary=@data/test1.bin"
 --}
 binaryToTextApp :: Wai.Application
 binaryToTextApp req respond = do
-  (_,fs) <- Parse.parseRequestBody Parse.lbsBackEnd req
+  (ps,fs) <- Parse.parseRequestBody Parse.lbsBackEnd req
   case lookup "binary" fs of
     Nothing -> respond $ response500 "parameter \"binary\" was not specified.."
     Just fi -> case fromBinary $ Parse.fileContent fi of
       Left msg -> respond $ response500 $ LT.encodeUtf8 $ "err: " <> (LT.pack msg)
-      Right cl -> respond $ responseTxt $ LT.encodeUtf8 $ toText KDKatakanaHalfWidth $ sort cl
+      Right cl -> respond $ responseTxt $ LT.encodeUtf8 $ toText (kanaDecode ps) $ sort cl
 
 
 {--
@@ -86,11 +86,11 @@ curl -X POST http://localhost:9999/ijbconv/mbtz -F "binary=@data/test1.bin" -F "
 --}
 multipleBinaryToTextZipApp :: Wai.Application
 multipleBinaryToTextZipApp req respond = do
-  (_,fs) <- Parse.parseRequestBody Parse.lbsBackEnd req
+  (ps,fs) <- Parse.parseRequestBody Parse.lbsBackEnd req
   case map snd $ filter (\x -> fst x == "binary") fs of
     [] -> respond $ response500 "parameter \"binary\" was not specified.."
     fs' -> do
-      es <- binariesToTexts KDKatakanaHalfWidth fs'
+      es <- binariesToTexts (kanaDecode ps) fs'
       case partitionEithers es of
         ([],ts) -> respond $ responseBin "ijbtext.zip" $ zipArchive ts
         (es,_)  -> respond $ response500 "err: something wrong" -- [TODO] error message
@@ -137,3 +137,10 @@ responseBin fn =
     ct = ("Content-Type","application/octet-stream")
     cd = ("Content-Disposition","attachment; filename=\"" <> fn <> "\"")
   in Wai.responseLBS H.status200 [ct,cd]
+
+kanaDecode :: [Parse.Param] -> KanaDecode
+kanaDecode ps = case lookup "kana-decode" ps of
+                  Nothing -> KDKatakanaHalfWidth
+                  Just "katakana-half" -> KDKatakanaHalfWidth
+                  Just "katakana-full" -> KDKatakanaFullWidth
+                  Just "hiragana-full" -> KDHiraganaFullWidth
