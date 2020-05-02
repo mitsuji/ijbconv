@@ -39,7 +39,7 @@ main = do
     "bt":_ -> binaryToText KDKatakanaHalfWidth
     "tb":_ -> textToBinary
     _ -> do
-      putStrLn "ijbconv 0.4.0.0"
+      putStrLn "ijbconv 0.5.0.0"
       putStrLn ""
       putStrLn "Usage: ijbconv-exe [command] [option] < [from file] > [to file]"
       putStrLn ""
