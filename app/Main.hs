@@ -9,16 +9,16 @@ import System.IO (stdin,stdout)
 import Data.List (sort)
 import System.Environment (getArgs)
 
-import Language.IchigoJamBASIC.CodeConverter (fromText,toText,fromBinary,toBinary)
+import Language.IchigoJamBASIC.CodeConverter (KanaDecode(..),fromText,toText,fromBinary,toBinary)
 
 
 
-binaryToText :: IO ()
-binaryToText = do
+binaryToText :: KanaDecode -> IO ()
+binaryToText kd = do
   e <- fromBinary <$> LBS.hGetContents stdin
   case e of
     Left msg -> putStrLn $ "err: " <> msg
-    Right cl -> LT.hPutStr stdout $ toText $ sort cl
+    Right cl -> LT.hPutStr stdout $ toText kd $ sort cl
 
   
 textToBinary :: IO ()
@@ -33,7 +33,7 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    "bt":_ -> binaryToText
+    "bt":_ -> binaryToText KDKatakanaHalfWidth
     "tb":_ -> textToBinary
     _ -> do
       putStrLn "ijbconv 0.4.0.0"

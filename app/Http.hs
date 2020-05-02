@@ -27,7 +27,7 @@ import qualified Data.ByteString.Lazy as LBS
 import qualified Codec.Archive.Zip as Zip
 import Data.Either (partitionEithers)
 
-import Language.IchigoJamBASIC.CodeConverter (fromText,toText,fromBinary,toBinary)
+import Language.IchigoJamBASIC.CodeConverter (KanaDecode(..),fromText,toText,fromBinary,toBinary)
 
 
 
@@ -65,7 +65,7 @@ binaryToTextApp req respond = do
     Nothing -> respond $ response500 "parameter \"binary\" was not specified.."
     Just fi -> case fromBinary $ Parse.fileContent fi of
       Left msg -> respond $ response500 $ LT.encodeUtf8 $ "err: " <> (LT.pack msg)
-      Right cl -> respond $ responseTxt $ LT.encodeUtf8 $ toText $ sort cl
+      Right cl -> respond $ responseTxt $ LT.encodeUtf8 $ toText KDKatakanaHalfWidth $ sort cl
 
 
 {--
@@ -90,20 +90,20 @@ multipleBinaryToTextZipApp req respond = do
   case map snd $ filter (\x -> fst x == "binary") fs of
     [] -> respond $ response500 "parameter \"binary\" was not specified.."
     fs' -> do
-      es <- binariesToTexts fs'
+      es <- binariesToTexts KDKatakanaHalfWidth fs'
       case partitionEithers es of
         ([],ts) -> respond $ responseBin "ijbtext.zip" $ zipArchive ts
         (es,_)  -> respond $ response500 "err: something wrong" -- [TODO] error message
   where
 
     -- [TODO] ファイル名に日付
-    binariesToTexts :: [Parse.FileInfo LBS.ByteString] -> IO [Either (T.Text,String) (T.Text,LT.Text)]
-    binariesToTexts = mapM f
+    binariesToTexts :: KanaDecode -> [Parse.FileInfo LBS.ByteString] -> IO [Either (T.Text,String) (T.Text,LT.Text)]
+    binariesToTexts kd = mapM f
       where
         f :: Parse.FileInfo LBS.ByteString -> IO (Either (T.Text,String) (T.Text,LT.Text))
         f (Parse.FileInfo fn _ fc) = case fromBinary fc of
           Left msg -> return $ Left  (T.decodeUtf8 fn, msg)
-          Right cl -> return $ Right (T.decodeUtf8 fn, toText $ sort cl)
+          Right cl -> return $ Right (T.decodeUtf8 fn, toText kd $ sort cl)
 
     -- [TODO] ファイル日付
     zipArchive :: [(T.Text,LT.Text)] -> LBS.ByteString

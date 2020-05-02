@@ -3,6 +3,7 @@
 module Language.IchigoJamBASIC.CodeConverter
        ( CodeLine(..)
        , CodeList(..)
+       , KanaDecode(..)
        , fromText
        , toText
        , fromBinary
@@ -433,16 +434,25 @@ emoji = [
   ,(0xff,0x1f353) -- Strawberry
   ]
 
--- [TODO] カナの全角半角選択 -> 一旦全角固定 -> 半角に変更(公式追従 2020/05)
--- [TODO] 絵文字対応         -> 一旦豆腐
--- [TODO] 特殊絵文字対応     -> 一旦豆腐
-decode :: BS.ByteString -> LTB.Builder
-decode bc = BS.foldl f "" bc
+
+
+data KanaDecode = KDKatakanaHalfWidth
+                | KDKatakanaFullWidth
+                | KDHiraganaFullWidth
+
+-- [TODO] カナの出力方法選択
+--        * 半角カナ
+--        * 全角カナ
+--        * 全角かな
+-- [MEMO] 変換できない文字 -> '�'(0xFFFD)
+-- [TODO] 特殊絵文字対応?
+decode :: KanaDecode -> BS.ByteString -> LTB.Builder
+decode kanaDecode bc = BS.foldl f "" bc
   where
     f :: LTB.Builder -> Word8 -> LTB.Builder
     f xs b = 
       let
-        x = fromJust $ decodeVisible7bit b <|> decodeKatakanaHalfWidth b
+        x = fromJust $ decodeVisible7bit b <|> decodeKatakana b
                                            <|> decodeGraph b
                                            <|> decodeEmoji b
                                            <|> decodeOther b
@@ -452,21 +462,19 @@ decode bc = BS.foldl f "" bc
     decodeVisible7bit b
       | 0x20 <=b && b <= 0x7E = Just $ LTB.singleton $ toEnum $ fromIntegral b
       | otherwise = Nothing
-    
-    decodeKatakanaFullWidth :: Word8 -> Maybe LTB.Builder
-    decodeKatakanaFullWidth b = LTB.singleton . toEnum <$> g
+
+    decodeKatakana :: Word8 -> Maybe LTB.Builder
+    decodeKatakana b = LTB.singleton . toEnum <$> case kanaDecode of
+                                                    KDKatakanaHalfWidth -> katakanaHalfWidth
+                                                    KDKatakanaFullWidth -> lookup b katakanaFullWidth
+                                                    KDHiraganaFullWidth -> lookup b hiraganaFullWidth
       where
-        g :: Maybe Int
-        g = lookup b katakanaFullWidth
-        
-    decodeKatakanaHalfWidth :: Word8 -> Maybe LTB.Builder
-    decodeKatakanaHalfWidth b = LTB.singleton . toEnum <$> g
-      where
-        g :: Maybe Int
-        g
+        katakanaHalfWidth :: Maybe Int
+        katakanaHalfWidth
           | b == 0xA0              = Just 0xA5
           | 0xA1 <= b && b <= 0xDF = Just $ (fromIntegral b) + (0xFF61-0xA1)
           | otherwise              = Nothing
+
 
     decodeGraph :: Word8 -> Maybe LTB.Builder
     decodeGraph b = LTB.singleton . toEnum <$> g
@@ -481,7 +489,7 @@ decode bc = BS.foldl f "" bc
         g = lookup b emoji
 
     decodeOther :: Word8 -> Maybe LTB.Builder
-    decodeOther b = Just $ LTB.singleton '█' -- 豆腐
+    decodeOther b = Just $ LTB.singleton '�' -- 0xFFFD
 
 {--         
     decodeOther :: Word8 -> Maybe LTB.Builder
@@ -493,11 +501,12 @@ decode bc = BS.foldl f "" bc
 --}
 
 
--- [TODO] Either にしてエラー処理
--- [TODO] 変換できない文字 -> エラー? 豆腐? -> 一旦豆腐
--- [TODO] 全角かな対応     -> 1文字濁音は2文字に -> (ひらがなも対応 2020/05)
--- [TODO] 絵文字対応       -> 一旦なし
--- [TODO] 特殊絵文字対応   -> 一旦そのまま
+
+-- [MEMO] 変換できない文字 -> '█'(0x8F)
+-- [TODO] 変換できない文字の扱い選択
+--        * 消す
+--        * 特定の文字に置換
+-- [TODO] 特殊絵文字対応?
 encode :: T.Text -> LBSB.Builder
 encode tx = T.foldl f "" tx
   where
@@ -584,8 +593,8 @@ encode tx = T.foldl f "" tx
 
 
 -- [前] 各文字コードから事前に LT.Text に デコード しておく前提
--- attoparsec で 行番号, コード を parse
--- BASICコードをLT.TextからIchigoJamの文字コードに変換(encode)
+-- [MEMO] attoparsec で 行番号, コード を parse
+-- [MEMO] BASICコードをLT.TextからIchigoJamの文字コードに変換(encode)
 -- [TODO] check コード行は255文字まで
 -- [TODO] コードをトリム?
 -- [TODO] endOfInput?
@@ -606,21 +615,21 @@ fromText xs =
 
 
 -- [前] 各文字コードには事後に LT.Text から エンコード する前提
--- LTB.Builder を Writer で構築して LT.Text を生成
--- BASICコードをIchigoJamの文字コードからLTB.Builderに変換(decode)
-toText :: CodeList -> LT.Text
-toText = LTB.toLazyText . execWriter . (mapM_ writeLine)
+-- [MEMO] LTB.Builder を Writer で構築して LT.Text を生成
+-- [MEMO] BASICコードをIchigoJamの文字コードからLTB.Builderに変換(decode)
+toText :: KanaDecode -> CodeList -> LT.Text
+toText kd = LTB.toLazyText . execWriter . (mapM_ writeLine)
   where
     writeLine ::  CodeLine -> Writer LTB.Builder ()
     writeLine (CodeLine num line) = do
       tell $ LTB.fromString $ show num
       tell $ LTB.singleton ' '
-      tell $ decode line
+      tell $ decode kd line
       tell $ LTB.singleton '\n'
 
 
 
--- Binary.Get で 行番号, コードを parse
+-- [MEMO] Binary.Get で 行番号, コードを parse
 -- [TODO] check コード行は255文字まで
 -- [TODO] check num > 0
 fromBinary :: LBS.ByteString -> Either String CodeList
@@ -655,7 +664,7 @@ fromBinary bs =
       
 
 
--- Binary.Put で LBS.ByteString を生成
+-- [MEMO] Binary.Put で LBS.ByteString を生成
 toBinary :: CodeList -> LBS.ByteString
 toBinary xs = P.runPut $ do
   rcount <- sum <$> mapM putLine xs
