@@ -149,8 +149,8 @@ graph = [
   ]
 
 
-kanaFullWidth :: [(Word8,Int)]
-kanaFullWidth= [
+katakanaFullWidth :: [(Word8,Int)]
+katakanaFullWidth= [
    (0xA0, 0xFFE5) -- '￥'
   ,(0xA1, 0x3002) -- '。'
   ,(0xA2, 0x300C) -- '「'
@@ -220,9 +220,81 @@ kanaFullWidth= [
   ,(0xDF, 0x309C) -- '゜'
   ]
 
+hiraganaFullWidth :: [(Word8,Int)]
+hiraganaFullWidth= [
+   (0xA0, 0xFFE5) -- '￥'
+  ,(0xA1, 0x3002) -- '。'
+  ,(0xA2, 0x300C) -- '「'
+  ,(0xA3, 0x300D) -- '」'
+  ,(0xA4, 0x3001) -- '、'
+  ,(0xA5, 0x30FB) -- '・'
+  ,(0xA6, 0x3092) -- 'を'
+  ,(0xA7, 0x3041) -- 'ぁ'
+  ,(0xA8, 0x3043) -- 'ぃ'
+  ,(0xA9, 0x3045) -- 'ぅ'
+  ,(0xAA, 0x3047) -- 'ぇ'
+  ,(0xAB, 0x3049) -- 'ぉ'
+  ,(0xAC, 0x3083) -- 'ゃ'
+  ,(0xAD, 0x3085) -- 'ゅ'
+  ,(0xAE, 0x3087) -- 'ょ'
+  ,(0xAF, 0x3063) -- 'っ'
 
-kanaFullWidthMulti :: [([Word8],Int)]
-kanaFullWidthMulti= [
+  ,(0xB0, 0x30FC) -- 'ー'
+  ,(0xB1, 0x3042) -- 'あ'
+  ,(0xB2, 0x3044) -- 'い'
+  ,(0xB3, 0x3046) -- 'う'
+  ,(0xB4, 0x3048) -- 'え'
+  ,(0xB5, 0x304A) -- 'お'
+  ,(0xB6, 0x304B) -- 'か'
+  ,(0xB7, 0x304D) -- 'き'
+  ,(0xB8, 0x304F) -- 'く'
+  ,(0xB9, 0x3051) -- 'け'
+  ,(0xBA, 0x3053) -- 'こ'
+  ,(0xBB, 0x3055) -- 'さ'
+  ,(0xBC, 0x3057) -- 'し'
+  ,(0xBD, 0x3059) -- 'す'
+  ,(0xBE, 0x305B) -- 'せ'
+  ,(0xBF, 0x305D) -- 'そ'
+
+  ,(0xC0, 0x305F) -- 'た'
+  ,(0xC1, 0x3061) -- 'ち'
+  ,(0xC2, 0x3064) -- 'つ'
+  ,(0xC3, 0x3066) -- 'て'
+  ,(0xC4, 0x3068) -- 'と'
+  ,(0xC5, 0x306A) -- 'な'
+  ,(0xC6, 0x306B) -- 'に'
+  ,(0xC7, 0x306C) -- 'ぬ'
+  ,(0xC8, 0x306D) -- 'ね'
+  ,(0xC9, 0x306E) -- 'の'
+  ,(0xCA, 0x306F) -- 'は'
+  ,(0xCB, 0x3072) -- 'ひ'
+  ,(0xCC, 0x3075) -- 'ふ'
+  ,(0xCD, 0x3078) -- 'へ'
+  ,(0xCE, 0x307B) -- 'ほ'
+  ,(0xCF, 0x307E) -- 'ま'
+
+  ,(0xD0, 0x307F) -- 'み'
+  ,(0xD1, 0x3080) -- 'む'
+  ,(0xD2, 0x3081) -- 'め'
+  ,(0xD3, 0x3082) -- 'も'
+  ,(0xD4, 0x3084) -- 'や'
+  ,(0xD5, 0x3086) -- 'ゆ'
+  ,(0xD6, 0x3088) -- 'よ'
+  ,(0xD7, 0x3089) -- 'ら'
+  ,(0xD8, 0x308A) -- 'り'
+  ,(0xD9, 0x308B) -- 'る'
+  ,(0xDA, 0x308C) -- 'れ'
+  ,(0xDB, 0x308D) -- 'ろ'
+  ,(0xDC, 0x308F) -- 'わ'
+  ,(0xDD, 0x3093) -- 'ん'
+  ,(0xDE, 0x309B) -- '゛'
+  ,(0xDF, 0x309C) -- '゜'
+  ]
+
+
+
+katakanaFullWidthMulti :: [([Word8],Int)]
+katakanaFullWidthMulti= [
    ([0xB6,0xDE], 0x30AC) -- 'ガ'
   ,([0xB7,0xDE], 0x30AE) -- 'ギ'
   ,([0xB8,0xDE], 0x30B0) -- 'グ'
@@ -251,6 +323,37 @@ kanaFullWidthMulti= [
   ,([0xB3,0xDE], 0x30F4) -- 'ヴ'
   ,([0xDC,0xDE], 0x30F7) -- 'ヷ'
   ,([0xA6,0xDE], 0x30FA) -- 'ヺ'
+  ]
+
+
+hiraganaFullWidthMulti :: [([Word8],Int)]
+hiraganaFullWidthMulti= [
+   ([0xB6,0xDE], 0x304C) -- 'が'
+  ,([0xB7,0xDE], 0x304E) -- 'ぎ'
+  ,([0xB8,0xDE], 0x3050) -- 'ぐ'
+  ,([0xB9,0xDE], 0x3052) -- 'げ'
+  ,([0xBA,0xDE], 0x3054) -- 'ご'
+  ,([0xBB,0xDE], 0x3056) -- 'ざ'
+  ,([0xBC,0xDE], 0x3058) -- 'じ'
+  ,([0xBD,0xDE], 0x305A) -- 'ず'
+  ,([0xBE,0xDE], 0x305C) -- 'ぜ'
+  ,([0xBF,0xDE], 0x305E) -- 'ぞ'
+  ,([0xC0,0xDE], 0x3060) -- 'だ'
+  ,([0xC1,0xDE], 0x3062) -- 'ぢ'
+  ,([0xC2,0xDE], 0x3065) -- 'づ'
+  ,([0xC3,0xDE], 0x3067) -- 'で'
+  ,([0xC4,0xDE], 0x3069) -- 'ど'
+  ,([0xCA,0xDE], 0x3070) -- 'ば'
+  ,([0xCA,0xDF], 0x3071) -- 'ぱ'
+  ,([0xCB,0xDE], 0x3073) -- 'び'
+  ,([0xCB,0xDF], 0x3074) -- 'ぴ'
+  ,([0xCC,0xDE], 0x3076) -- 'ぶ'
+  ,([0xCC,0xDF], 0x3077) -- 'ぷ'
+  ,([0xCD,0xDE], 0x3079) -- 'べ'
+  ,([0xCD,0xDF], 0x307A) -- 'ぺ'
+  ,([0xCE,0xDE], 0x307C) -- 'ぼ'
+  ,([0xCE,0xDF], 0x307D) -- 'ぽ'
+  ,([0xB3,0xDE], 0x3094) -- 'ゔ'
   ]
 
 
@@ -339,7 +442,7 @@ decode bc = BS.foldl f "" bc
     f :: LTB.Builder -> Word8 -> LTB.Builder
     f xs b = 
       let
-        x = fromJust $ decodeVisible7bit b <|> decodeKanaHalfWidth b
+        x = fromJust $ decodeVisible7bit b <|> decodeKatakanaHalfWidth b
                                            <|> decodeGraph b
                                            <|> decodeEmoji b
                                            <|> decodeOther b
@@ -350,14 +453,14 @@ decode bc = BS.foldl f "" bc
       | 0x20 <=b && b <= 0x7E = Just $ LTB.singleton $ toEnum $ fromIntegral b
       | otherwise = Nothing
     
-    decodeKanaFullWidth :: Word8 -> Maybe LTB.Builder
-    decodeKanaFullWidth b = LTB.singleton . toEnum <$> g
+    decodeKatakanaFullWidth :: Word8 -> Maybe LTB.Builder
+    decodeKatakanaFullWidth b = LTB.singleton . toEnum <$> g
       where
         g :: Maybe Int
-        g = lookup b kanaFullWidth
+        g = lookup b katakanaFullWidth
         
-    decodeKanaHalfWidth :: Word8 -> Maybe LTB.Builder
-    decodeKanaHalfWidth b = LTB.singleton . toEnum <$> g
+    decodeKatakanaHalfWidth :: Word8 -> Maybe LTB.Builder
+    decodeKatakanaHalfWidth b = LTB.singleton . toEnum <$> g
       where
         g :: Maybe Int
         g
@@ -401,8 +504,9 @@ encode tx = T.foldl f "" tx
     f :: LBSB.Builder -> Char -> LBSB.Builder
     f xs b = 
       let
-        x = fromJust $ encodeVisible7bit b <|> encodeKanaFullWidth b <|> encodeKanaFullWidthMulti b
-                                           <|> encodeKanaHalfWidth b
+        x = fromJust $ encodeVisible7bit b <|> encodeKatakanaHalfWidth b
+                                           <|> encodeKatakanaFullWidth b <|> encodeKatakanaFullWidthMulti b
+                                           <|> encodeHiraganaFullWidth b <|> encodeHiraganaFullWidthMulti b
                                            <|> encodeGraph b
                                            <|> encodeEmoji b
                                            <|> encodeGraphLegacy b
@@ -415,26 +519,38 @@ encode tx = T.foldl f "" tx
       | isAscii b = Just $ LBSB.char7 b
       | otherwise = Nothing
                     
-    encodeKanaFullWidth :: Char -> Maybe LBSB.Builder
-    encodeKanaFullWidth b = LBSB.word8 <$> (g $ fromEnum b)
+    encodeKatakanaFullWidth :: Char -> Maybe LBSB.Builder
+    encodeKatakanaFullWidth b = LBSB.word8 <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe Word8
-        g c = lookup c (swap <$> kanaFullWidth)
+        g c = lookup c (swap <$> katakanaFullWidth)
         
-    encodeKanaFullWidthMulti :: Char -> Maybe LBSB.Builder
-    encodeKanaFullWidthMulti b = mconcat <$> (map LBSB.word8) <$> (g $ fromEnum b)
+    encodeKatakanaFullWidthMulti :: Char -> Maybe LBSB.Builder
+    encodeKatakanaFullWidthMulti b = mconcat <$> (map LBSB.word8) <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe [Word8]
-        g c = lookup c (swap <$> kanaFullWidthMulti)
+        g c = lookup c (swap <$> katakanaFullWidthMulti)
 
-    encodeKanaHalfWidth :: Char -> Maybe LBSB.Builder
-    encodeKanaHalfWidth b = LBSB.word8 <$> (g $ fromEnum b)
+    encodeKatakanaHalfWidth :: Char -> Maybe LBSB.Builder
+    encodeKatakanaHalfWidth b = LBSB.word8 <$> (g $ fromEnum b)
       where
         g :: Int -> Maybe Word8
         g c
           | c == 0xA5                  = Just 0xA0
           | 0xFF61 <= c && c <= 0xFF9F = Just $ fromIntegral $ c - (0xFF61-0xA1)
           | otherwise                  = Nothing
+
+    encodeHiraganaFullWidth :: Char -> Maybe LBSB.Builder
+    encodeHiraganaFullWidth b = LBSB.word8 <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe Word8
+        g c = lookup c (swap <$> hiraganaFullWidth)
+
+    encodeHiraganaFullWidthMulti :: Char -> Maybe LBSB.Builder
+    encodeHiraganaFullWidthMulti b = mconcat <$> (map LBSB.word8) <$> (g $ fromEnum b)
+      where
+        g :: Int -> Maybe [Word8]
+        g c = lookup c (swap <$> hiraganaFullWidthMulti)
 
     encodeGraphLegacy :: Char -> Maybe LBSB.Builder
     encodeGraphLegacy b = LBSB.word8 <$> (g $ fromEnum b)
