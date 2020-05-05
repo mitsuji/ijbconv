@@ -1,0 +1,12 @@
+$ docker build --tag ijbconv .
+$ docker images
+
+$ docker run --rm -it -p 8080:8080 ijbconv
+
+$ docker create -p 8080:8080 ijbconv
+$ docker start xxxxx
+$ docker stop xxxxx
+
+$ docker ps -a
+$ docker rm xxxx
+
