@@ -1,3 +1,8 @@
+https://qiita.com/jerrywdlee/items/03ee5c6bd33894e60ed0
+https://github.com/sgerrand/alpine-pkg-glibc
+https://qiita.com/jerrywdlee/items/03ee5c6bd33894e60ed0
+
+
 $ docker build --tag ijbconv .
 $ docker images
 
